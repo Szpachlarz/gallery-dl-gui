@@ -2,6 +2,7 @@ import dearpygui.dearpygui as dpg
 import subprocess
 from pathlib import Path
 import pyperclip
+import re
 downloads_path = str(Path.home() / "Downloads")
 
 dpg.create_context()
@@ -22,18 +23,24 @@ def filecallback(sender, app_data):
 def wklej(sender, app_data):
     dpg.set_value("textbox", pyperclip.paste())
 
-#def textbox(sender, app_data):
-#    dpg.set_value("textbox", "")
+def validation(sender, app_data):
+    result = subprocess.run(["gallery-dl", "-E", dpg.get_value("textbox")], capture_output=True, text=True).stderr
+    x = re.search("Unsupported URL", result)
+    if x!=None:
+        dpg.set_value("validate", "Bledny link")
+    else:
+        dpg.set_value("validate", "")
 
 dpg.add_file_dialog(
     directory_selector=True, show=False, callback=filecallback, tag="file_dialog_id", width=700, height=400)
 
 with dpg.item_handler_registry(tag="widget handler") as handler:
-   dpg.add_item_clicked_handler(callback=pobierz)
+    dpg.add_item_clicked_handler(callback=pobierz)
 
 with dpg.window(width=500, height=300, label="GUI"):
     dpg.add_text("Podaj link do galerii", tag="text item")
-    dpg.add_input_text(hint="http://", tag="textbox")
+    dpg.add_input_text(hint="http://", tag="textbox", callback=validation)
+    dpg.add_text(default_value="", tag="validate")
     dpg.add_image_button(label="Wklej", tag="przyciskwklej", width=15, height=15, texture_tag="iconpaste", callback=wklej)
     dpg.add_button(label="Pobierz", tag="przyciskpobierz", callback=pobierz)
     dpg.add_button(label="Wybierz sciezke", callback=lambda: dpg.show_item("file_dialog_id"))
