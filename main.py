@@ -30,7 +30,7 @@ def validation(sender, app_data):
         dpg.set_value("validate", "")
 
 dpg.add_file_dialog(
-    directory_selector=True, show=False, callback=filecallback, tag="file_dialog_id", width=700, height=400)
+    directory_selector=True, show=False, callback=filecallback, tag="file_dialog_id", width=700, height=250)
 
 with dpg.item_handler_registry(tag="widget handler") as handler:
     dpg.add_item_clicked_handler(callback=pobierz)
@@ -40,22 +40,28 @@ with dpg.font_registry():
         dpg.add_font_chars([0x0105, 0x0104, 0x0107, 0x0106, 0x0119, 0x0118, 0x0142, 0x0141, 0x0144, 0x0143, 0x00f3, 0x00d3, 0x015b, 0x015b, 0x015a, 0x017a, 0x0179, 0x017c, 0x017b])
         default_font = font1
 
-with dpg.window(width=500, height=300, label="GUI"):
+with dpg.window(width=700, height=250, no_resize=True, no_collapse=True, no_close=True, modal=True, no_move=True, no_title_bar=True):
     dpg.add_text("Podaj link do galerii", tag="text item")
     with dpg.group(horizontal=True):
-        dpg.add_input_text(hint="http://", tag="textbox", callback=validation)
+        dpg.add_input_text(hint="http://", tag="textbox", width=600, callback=validation)
         dpg.add_image_button(label="Wklej", tag="przyciskwklej", width=15, height=15, texture_tag="iconpaste", callback=wklej)
         dpg.add_text(default_value="", tag="validate")    
     dpg.add_button(label="Wybierz ścieżkę", callback=lambda: dpg.show_item("file_dialog_id"))
-    dpg.add_input_text(default_value=downloads_path, tag="textbox2")
+    dpg.add_input_text(default_value=downloads_path, width=600, tag="textbox2")
     dpg.add_text()
     dpg.add_button(label="Pobierz", tag="przyciskpobierz", callback=pobierz)
     dpg.bind_font(default_font)
 
+with dpg.theme() as global_theme:
+    with dpg.theme_component(dpg.mvAll):
+        dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, x=20, y=30, category=dpg.mvThemeCat_Core)
+
+dpg.bind_theme(global_theme)
+
 # bind item handler registry to item
 dpg.bind_item_handler_registry("przyciskpobierz", "widget handler")
 
-dpg.create_viewport(title='Custom Title', width=800, height=600)
+dpg.create_viewport(title='gallery-dl gui', width=700, height=250, resizable=False)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()
